@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire d'Emails</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .email-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 80px;
+        }
+
+        .info-value {
+            color: #333;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .analysis-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .category-result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .category-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .category-priority {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .assignee-card {
+            background: #f0f4ff;
+            border-left: 3px solid #667eea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assignee-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .assignee-avatar {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .assignee-info {
+            flex: 1;
+        }
+
+        .assignee-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .assignee-skills {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .skill-list {
+            margin-top: 12px;
+        }
+
+        .skill-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .skill-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .skill-dot {
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f4ff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #28a745;
+            margin-bottom: 16px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .alert-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Gestionnaire d'Emails</h1>
+        <p class="subtitle">Service CO + Logistique</p>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="color: #666; font-size: 14px;">Analyse de l'email en cours...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="email-info">
+                <div class="info-row">
+                    <span class="info-label">De:</span>
+                    <span class="info-value" id="emailFrom">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Objet:</span>
+                    <span class="info-value" id="emailSubject">-</span>
+                </div>
+            </div>
+
+            <div id="successMessage" class="success-message">
+                ✅ Email catégorisé et assigné avec succès !
+            </div>
+
+            <div class="analysis-section">
+                <div class="section-title">🎯 Catégorie détectée</div>
+                <div class="category-result" id="categoryResult">
+                    <div class="category-icon" id="categoryIcon">💰</div>
+                    <div class="category-name" id="categoryName">Demande devis</div>
+                    <div class="category-priority">Priorité: <span id="categoryPriority">Haute</span></div>
+                </div>
+            </div>
+
+            <div class="analysis-section">
+                <div class="section-title">👥 Personnes recommandées</div>
+                <div id="assigneesList"></div>
+            </div>
+
+            <div class="analysis-section">
+                <div class="section-title">🎓 Compétences requises</div>
+                <div class="skill-list" id="skillsList"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="assignEmail()">
+                    ✅ Assigner et Catégoriser
+                </button>
+                <button class="btn btn-secondary" onclick="analyzeAgain()">
+                    🔄 Réanalyser
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Définition des catégories
+        const categories = {
+            'Demande devis': {
+                icon: '💰',
+                assignees: ['Aline B', 'Daisy H'],
+                priority: 'Haute',
+                skills: ['Découverte du besoin', 'Saisie des devis', 'Rédaction mails/devis']
+            },
+            'Question technique': {
+                icon: '🔧',
+                assignees: ['Aline B', 'Daisy H', 'Nathalie'],
+                priority: 'Haute',
+                skills: ['Compréhension demandes techniques', 'Exploitation données techniques']
+            },
+            'Suivi commande': {
+                icon: '📦',
+                assignees: ['Aline B', 'Daisy H', 'Nathalie'],
+                priority: 'Moyenne',
+                skills: ['Suivi et relances', 'Transformation des cdes clients']
+            },
+            'SAV / Réclamation': {
+                icon: '⚠️',
+                assignees: ['Daisy H', 'Nathalie'],
+                priority: 'Urgente',
+                skills: ['Gestion démarche SAV', 'Apport de solutions alternatives']
+            },
+            'Demande tarifs': {
+                icon: '💲',
+                assignees: ['Aline B', 'Daisy H'],
+                priority: 'Moyenne',
+                skills: ['Suivi et application des tarifs produits']
+            },
+            'Planning / Livraison': {
+                icon: '🚚',
+                assignees: ['Nathalie', 'Daisy H'],
+                priority: 'Haute',
+                skills: ['Suivi planning production', 'Gestion tournées livraison']
+            },
+            'Stock / Inventaire': {
+                icon: '📊',
+                assignees: ['Nathalie'],
+                priority: 'Moyenne',
+                skills: ['Suivi de stock inventaire', 'Commandes matières']
+            },
+            'Relationnel général': {
+                icon: '👥',
+                assignees: ['Aline B', 'Daisy H', 'Nathalie'],
+                priority: 'Basse',
+                skills: ['Relationnel client', 'Réponse aux demandes clients']
+            }
+        };
+
+        let currentItem;
+        let currentCategory;
+
+        // Initialisation Office
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.Outlook) {
+                currentItem = Office.context.mailbox.item;
+                analyzeEmail();
+            }
+        });
+
+        // Analyse de l'email
+        function analyzeEmail() {
+            setTimeout(() => {
+                const subject = currentItem.subject || '';
+                const from = currentItem.from ? currentItem.from.emailAddress : '';
+                
+                // Détection intelligente de la catégorie
+                currentCategory = detectCategory(subject);
+                
+                // Affichage des résultats
+                displayResults(from, subject, currentCategory);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            }, 1500);
+        }
+
+        // Détection de catégorie basée sur des mots-clés
+        function detectCategory(subject) {
+            const subjectLower = subject.toLowerCase();
+            
+            if (subjectLower.includes('devis') || subjectLower.includes('prix') || subjectLower.includes('cotation')) {
+                return 'Demande devis';
+            }
+            if (subjectLower.includes('technique') || subjectLower.includes('spécification') || subjectLower.includes('plan')) {
+                return 'Question technique';
+            }
+            if (subjectLower.includes('commande') || subjectLower.includes('suivi') || subjectLower.includes('où est')) {
+                return 'Suivi commande';
+            }
+            if (subjectLower.includes('problème') || subjectLower.includes('réclamation') || subjectLower.includes('sav') || subjectLower.includes('défaut')) {
+                return 'SAV / Réclamation';
+            }
+            if (subjectLower.includes('tarif') || subjectLower.includes('grille') || subjectLower.includes('catalogue')) {
+                return 'Demande tarifs';
+            }
+            if (subjectLower.includes('livraison') || subjectLower.includes('planning') || subjectLower.includes('délai')) {
+                return 'Planning / Livraison';
+            }
+            if (subjectLower.includes('stock') || subjectLower.includes('inventaire') || subjectLower.includes('disponibilité')) {
+                return 'Stock / Inventaire';
+            }
+            
+            return 'Relationnel général';
+        }
+
+        // Affichage des résultats
+        function displayResults(from, subject, categoryName) {
+            document.getElementById('emailFrom').textContent = from;
+            document.getElementById('emailSubject').textContent = subject;
+            
+            const category = categories[categoryName];
+            
+            document.getElementById('categoryIcon').textContent = category.icon;
+            document.getElementById('categoryName').textContent = categoryName;
+            document.getElementById('categoryPriority').textContent = category.priority;
+            
+            // Assignés
+            const assigneesList = document.getElementById('assigneesList');
+            assigneesList.innerHTML = '';
+            category.assignees.forEach(person => {
+                const initials = person.split(' ').map(n => n[0]).join('');
+                assigneesList.innerHTML += `
+                    <div class="assignee-card">
+                        <div class="assignee-avatar">${initials}</div>
+                        <div class="assignee-info">
+                            <div class="assignee-name">${person}</div>
+                            <div class="assignee-skills">Expert en ${categoryName}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Compétences
+            const skillsList = document.getElementById('skillsList');
+            skillsList.innerHTML = '';
+            category.skills.forEach(skill => {
+                skillsList.innerHTML += `
+                    <div class="skill-item">
+                        <div class="skill-dot"></div>
+                        <span>${skill}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Assignment de l'email
+        function assignEmail() {
+            const category = categories[currentCategory];
+            
+            // Ajouter la catégorie
+            currentItem.categories.addAsync([currentCategory], (result) => {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    // Afficher le message de succès
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Optionnel: Marquer comme lu ou transférer
+                    // currentItem.displayReplyForm({ ... });
+                    
+                    setTimeout(() => {
+                        document.getElementById('successMessage').style.display = 'none';
+                    }, 5000);
+                }
+            });
+        }
+
+        // Réanalyser
+        function analyzeAgain() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            analyzeEmail();
+        }
+    </script>
+</body>
+</html>
